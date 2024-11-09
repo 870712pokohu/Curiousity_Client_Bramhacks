@@ -6,6 +6,24 @@ import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import vuetify from 'vite-plugin-vuetify'
 
+const userGroup = process.env.USER_GROUP || 'user';
+
+let port;
+
+switch(userGroup){
+  case 'user':
+    port = 3000;
+    console.log('User group is user');
+    break;
+  case 'admin':
+    port = 3001;
+    console.log('User group is admin');
+    break;
+  default:
+    port = 3000;
+    break;
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -13,7 +31,7 @@ export default defineConfig({
       {
         template: {
           transformAssetUrls: {
-            
+
           }
         }
       }
@@ -31,13 +49,6 @@ export default defineConfig({
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json', '.vue'],
   },
   server: {
-    port: 8080,
-    proxy: {
-      '^/api': {
-        target: 'http://localhost:3080', // dev
-        changeOrigin: true,
-        secure: false,
-      },
-    }
+    port: port,
   },
 })
