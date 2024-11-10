@@ -1,6 +1,9 @@
+const BASE_URL = 'http://localhost:7000'; // Replace with your backend URL
+
+
 const getApiRequest = async (url) => {
   try {
-    const response = await fetch(url);
+    const response = await fetch(`${BASE_URL}${url}`);
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -12,7 +15,7 @@ const getApiRequest = async (url) => {
 
 const postApiRequest = async (url, data) => {
   try {
-    const response = await fetch(url, {
+    const response = await fetch(`${BASE_URL}${url}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
