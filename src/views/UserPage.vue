@@ -31,7 +31,7 @@
           </v-avatar>
 
           <v-chip
-            :color="isUserMessage(index) ? 'blue lighten-4' : 'amber-lighten-3'"
+            :color="isUserMessage(index) ? 'blue lighten-4' : '#B0BEC5'"
             class="pa-5"
             size="x-large"
             variant="flat"
@@ -67,12 +67,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
-import RobotImage from '../assets/Robot.png'
-import userImage from '../assets/User.jpeg'
+import { ref, onMounted } from 'vue';
+import RobotImage from '../assets/Robot.png';
+import userImage from '../assets/User.jpeg';
 import NavBar from '@/components/NavBar.vue';
 import { createComplaint } from '@/services/complaint.servcie';
+
 
 const questionInput = ref('');
 const messages = ref([]);
@@ -80,33 +80,44 @@ const responses = ref([]);
 const isTyping = ref(false);
 
 const isUserMessage = (index) => {
-  return index % 2 === 0;
+  // Assume first message is from the assistant
+  return index % 2 !== 0;
 };
 
 const formatMessage = (message, index) => {
-  return isUserMessage(index) ? `User: ${message}` : `Assistant: ${responses.value[Math.floor(index / 2)]}`;
-};
+  // Directly return the greeting if it's the first message
+  if (index === 0) {
+    return `Assistant: ${message}`;
+  }
+  // Use adjusted index for responses since the first message has no corresponding entry in `responses`
+  return isUserMessage(index) ? `User: ${message}` : `Assistant: ${responses.value[Math.floor((index - 1) / 2)]}`;
+}
+
+// Default greeting message when the component is mounted
+onMounted(() => {
+  const defaultGreeting = "Hello! How can I assist you today?";
+  messages.value.push(defaultGreeting); 
+});
 
 const handleSubmit = async () => {
   const message = questionInput.value;
+  questionInput.value = ''; // Clear the input after sending
   messages.value.push(message);
-  isTyping.value = true;
+  isTyping.value = true; // Start typing indication
+  
   try {
     const result = await createComplaint(message);
-    console.log(result)
-    responses.value.push(result.answer);
-    messages.value.push(result.answer); 
-
-    // Clear the input after sending
-    questionInput.value = ''; 
-    isTyping.value = false;
+    responses.value.push(result.answer); // Store the assistant's response
+    messages.value.push(result.answer); // Display the assistant's response
   } catch (error) {
     console.error('Error:', error);
     responses.value.push('Failed to get response');
+    messages.value.push('Failed to get response'); // Display error message
   }
+  isTyping.value = false; // Stop typing indication, should be set regardless of success or error
 };
-</script>
 
+</script>
 
 <style>
 .user-avatar, .robot-avatar{

@@ -17,9 +17,8 @@ const updateComplaint = async (id, data) => {
 }
 
 const createComplaint = async (message) => {
-  return postApiRequest(`/new_complaint`, message);
-  // return postApiRequest(`http://localhost:3001/api/chat`, message);
-
+  // return postApiRequest(`/new_complaint`, message);
+  return postApiRequest(`http://localhost:3001/api/chat`, message);
 }
 
 export {
