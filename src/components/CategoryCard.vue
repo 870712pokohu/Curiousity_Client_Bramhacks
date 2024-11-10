@@ -7,7 +7,7 @@
     ></v-img>
     <div class="pa-3 d-flex flex-lg-row flex-md-column flex-sm-column align-center justify-space-between">
       <v-card-title class="text-h5">{{category.name}}</v-card-title>
-      <v-card-subtitle class="text-h6" >Complaints: {{category.count}}</v-card-subtitle>
+      <v-card-subtitle class="text-h6 font-weight-bold text-blue-accent-4" >Complaints: {{category.count}}</v-card-subtitle>
     </div>
   </v-card>
 </template>

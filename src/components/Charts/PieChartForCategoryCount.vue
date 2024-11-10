@@ -9,14 +9,18 @@
 import { computed, ref } from 'vue';
 import { Pie } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 // Register the necessary components with Chart.js
-ChartJS.register(Title, Tooltip, Legend, ArcElement);
+ChartJS.register(Title, Tooltip, Legend, ArcElement, ChartDataLabels);
 
 
   const props = defineProps({
     categories: Object,
   })
+
+  const emit = defineEmits(['segment-clicked']);
+
 
   const options = ref({
     responsive: true,
@@ -41,9 +45,33 @@ ChartJS.register(Title, Tooltip, Legend, ArcElement);
           top: 10,
           bottom: 30,
         },
+      },
+      datalabels: {
+        formatter: (value, context) => {
+          const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+          const percentage = (value / total * 100).toFixed(2) + '%';
+          return percentage;
+        },
+        color: '#fff',
+        font: {
+          size: 20,
+          weight: 'bold',
+        },
+      },
     },
-    },
+    onClick: (event, elements) => {
+      console.log(elements)
+    if (elements.length > 0) {
+      const chart = elements[0].chart;
+      const index = elements[0].index;
+      emit('segment-clicked', index);
+    }
+    else{
+      emit('segment-clicked', null);
+    }
+  },
   })
+
 
   console.log('categories', props.categories);
 

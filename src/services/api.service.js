@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:7000'; // Replace with your backend URL
+const BASE_URL = 'http://localhost:8000'; // Replace with your backend URL
 
 
 const getApiRequest = async (url) => {

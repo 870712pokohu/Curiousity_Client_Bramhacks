@@ -27,7 +27,7 @@
           </v-avatar>
 
           <v-avatar v-if="!isUserMessage(index)" color="green lighten-4" size="50" class="robot-avatar">
-            <v-img :src="RobotImage"></v-img> 
+            <v-img :src="RobotImage"></v-img>
           </v-avatar>
 
           <v-chip
@@ -49,7 +49,7 @@
         <v-text-field
           class="flex-grow-1"
           v-model="questionInput"
-          
+
           density="compact"
           rounded="pill"
           variant="solo-filled"
@@ -89,22 +89,22 @@ const formatMessage = (message, index) => {
 
 const handleSubmit = async () => {
   const message = questionInput.value;
+  console.log("Submitting message:", message); // Debug the message being sent
   messages.value.push(message);
   isTyping.value = true;
   try {
     const result = await createComplaint(message);
-    console.log(result)
-    responses.value.push(result.answer);
-    messages.value.push(result.answer); 
-
-    // Clear the input after sending
-    questionInput.value = ''; 
-    isTyping.value = false;
-  } catch (error) {
+    console.log("Backend Response:", result); // Debug the response from the backend
+    responses.value.push(result.answer); // Store the assistant's response
+    messages.value.push(result.answer); // Display the assistant's response
+    questionInput.value = ''; // Clear input
+  }  catch (error) {
     console.error('Error:', error);
-    responses.value.push('Failed to get response');
+    responses.value.push('Failed to classify the complaint.');
+    isTyping.value = false;
   }
 };
+
 </script>
 
 

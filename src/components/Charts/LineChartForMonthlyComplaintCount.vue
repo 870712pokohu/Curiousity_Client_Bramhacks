@@ -1,7 +1,6 @@
 <template>
   <div class="chart-container">
-    
-    <!-- <Line :data="chartData" :options="chartOptions" /> -->
+    <Line :data="chartData" :options="chartOptions" />
   </div>
 </template>
 
@@ -14,14 +13,39 @@ import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, PointElement, Li
 ChartJS.register(Title, Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale);
 
 const props = defineProps({
-  complaints: Array, // Array of objects with month and count properties
+  complaints: Array, // Array of complaint objects
 });
 
-// const chartData = computed(() => {
-//   return {
+const months = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
 
-//   };
-// });
+const groupedComplaints = computed(() => {
+  const counts = Array(12).fill(0); // Initialize an array with 12 zeros
+
+  props.complaints.forEach(complaint => {
+    const month = new Date(complaint.lastModifiedDate).getMonth(); // Get the month (0-11)
+    counts[month]++;
+  });
+
+  return counts;
+});
+
+const chartData = computed(() => {
+  return {
+    labels: months,
+    datasets: [
+      {
+        label: 'Monthly Complaint Count',
+        backgroundColor: '#42A5F5',
+        borderColor: '#42A5F5',
+        data: groupedComplaints.value,
+        fill: false,
+      },
+    ],
+  };
+});
 
 const chartOptions = {
   responsive: true,
@@ -29,10 +53,23 @@ const chartOptions = {
   plugins: {
     legend: {
       position: 'top',
+      labels: {
+          font: {
+            size: 18,
+          },
+          padding: 20,
+        },
     },
     title: {
       display: true,
-      text: 'Monthly Complaint Count',
+      text: 'Complaints by Year (2024)',
+      font: {
+        size: 20,
+      },
+      padding: {
+        top: 10,
+        bottom: 30,
+      },
     },
   },
   scales: {
@@ -51,7 +88,6 @@ const chartOptions = {
     },
   },
 };
-
 </script>
 
 <style scoped>

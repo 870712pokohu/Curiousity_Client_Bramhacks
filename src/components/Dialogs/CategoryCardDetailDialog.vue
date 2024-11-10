@@ -6,6 +6,7 @@
         <v-chip
           v-for="subCategory in subCategories"
           :key="subCategory"
+          @click="handleChipClick(subCategory)"
           class="me-3 rounded-lg pa-6"
           color="primary"
           size="large"
@@ -14,6 +15,12 @@
           {{ subCategory }}
         </v-chip>
       </v-chip-group>
+      <v-data-table
+        v-if="filteredData.length > 0"
+        :items-per-page="5"
+        :items="filteredData"
+        class="mt-3"
+      />
     </v-card-text>
   </v-card>
 </template>
@@ -27,28 +34,61 @@ const props = defineProps({
   category: Object,
 });
 
+console.log(props.category);
 
+const headers = [
+  { text: 'Id', value: 'complaintId' },
+  { text: 'Complaint', value: 'complaintDescription' },
+  { text: 'Category', value: 'category' },
+  { text: 'Updated Date', value: 'lastModifiedDate' },
+];
+
+const selectedSubCategory = ref(null);
 const subCategories = ref([]);
+const filteredData = ref([]);
 
 const populateSubCategory = () => {
-  switch (props.category.name) {
-    case 'Public Transit':
-      subCategories.value = ['Delays', 'Crowding', 'Fare', 'Accessibility', 'Cleanliness'];
-      break;
-    case 'Parking':
-      subCategories.value = ['Availability', 'Pricing', 'Illegal Parking', 'Special Parking Needs'];
-      break;
-    case 'Road Safety':
-      subCategories.value = ['Street Lighting', 'Pedestrian Crossings', 'Traffic Signs', 'Accident Hotspots', 'Speeding Zones'];
-      break;
-    default:
-      subCategories.value = [];
+  const subCategoryCounts = {};
+
+  // Calculate the count for each subCategory
+  for (const subCategory in props.category.subCategories) {
+    subCategoryCounts[subCategory] = props.category.subCategories[subCategory].length;
+  }
+
+  // Sort subcategories by count in descending order
+  const sortedSubCategories = Object.keys(subCategoryCounts).sort((a, b) => {
+    return subCategoryCounts[b] - subCategoryCounts[a];
+  });
+
+  // Populate the subCategories array with the name and count
+  subCategories.value = sortedSubCategories.map(subCategory => {
+    return `${subCategory} (${subCategoryCounts[subCategory]})`;
+  });
+};
+
+const filterDataBySubCategory = () => {
+  console.log(selectedSubCategory.value);
+
+  if (selectedSubCategory.value) {
+    const subCategoryName = selectedSubCategory.value.split(' (')[0];
+    filteredData.value = props.category.subCategories[subCategoryName] || [];
+  } else {
+    // Show all data if no chip is selected
+    filteredData.value = Object.values(props.category.subCategories).flat();
   }
 };
 
+const handleChipClick = (subCategory) => {
+  if (selectedSubCategory.value === subCategory) {
+    selectedSubCategory.value = null;
+  } else {
+    selectedSubCategory.value = subCategory;
+  }
+};
+
+
 watch(() => props.category, populateSubCategory, { immediate: true });
-
-
+watch(selectedSubCategory, filterDataBySubCategory, { immediate: true });
 
 </script>
 
@@ -57,6 +97,6 @@ watch(() => props.category, populateSubCategory, { immediate: true });
 .custom-underline {
   text-decoration: underline;
   text-decoration-color: #448AFF;
-  text-decoration-thickness: 7px;
+  text-decoration-thickness: 10px;
 }
 </style>

@@ -4,12 +4,13 @@
 
   <v-card class="bg-blue-accent-2 h-95 pa-5">
     <v-sheet class="bg-transparent pa-3">
-       <v-row class="bg-white pa-5 rounded-lg">
-        <v-col sm="6" md="4">
-          <PieChartForCategoryCount :categories="categories" />
+      <v-row class="bg-white pa-3 rounded-lg">
+        <v-col sm="6" md="6">
+          <PieChartForCategoryCount :categories="categories" @segment-clicked="handleSegmentClick" />
         </v-col>
-        <v-col sm="6" md="4">
-          <LineChartForMonthlyComplaintCount :complaints="complaints"/>
+        <v-col sm="6" md="6">
+          <Pie v-if="showSubChart" :data="subChartData" :options="subChartOptions" />
+          <LineChartForMonthlyComplaintCount v-else :complaints="complaints" />
         </v-col>
       </v-row>
     </v-sheet>
@@ -56,6 +57,7 @@
             :items="filteredComplaints"
             :items-per-page="5"
             :no-data-text="`No complaints found for the ${timeFilter[selectedTimeFilter]}`"
+            class="mt-3 custom-data-table"
             >
           </v-data-table>
         </v-card>
@@ -81,29 +83,25 @@
 <script setup>
 
 import CategoryCard from '../components/CategoryCard.vue'
-import { ref, watch } from 'vue';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import ComplaintCardDetailDialog from '@/components/Dialogs/ComplaintCardDetailDialog.vue';
 import CategoryCardDetailDialog from '@/components/Dialogs/CategoryCardDetailDialog.vue';
-import { getComplaintByCategory } from '@/services/complaint.servcie';
+import { getComplaintByCategory, getComplaints } from '@/services/complaint.servcie';
 import PieChartForCategoryCount from '@/components/Charts/PieChartForCategoryCount.vue';
 import AppBar from '@/components/AppBar.vue';
 import LineChartForMonthlyComplaintCount from '@/components/Charts/LineChartForMonthlyComplaintCount.vue';
+import { Pie } from 'vue-chartjs';
+import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+
+// Register the necessary components with Chart.js
+ChartJS.register(Title, Tooltip, Legend, ArcElement, ChartDataLabels);
 
 const categories = ref([
-  {
-    name: 'Public Transit',
-    count: 10
-  }
-  ,
-  {
-    name: 'Parking',
-    count: 20
-  }
-  ,
-  {
-    name: 'Road Safety',
-    count: 30
-  }
+  { name: 'Public Transit', count: 0, subCategories: {} },
+  { name: 'Parking', count: 0, subCategories: {} },
+  { name: 'Road Safety', count: 0, subCategories: {} },
 ]);
 
 const timeFilter = ref([
@@ -114,107 +112,74 @@ const timeFilter = ref([
 
 const selectedTimeFilter = ref(null);
 
+const complaints = ref([])
 
-const complaints = ref([
-  {
-    id: 1,
-    description: 'Delays in public transit services.',
-    category: 'Public Transit',
-    subCategory: 'Delays',
-    timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+const showSubChart = ref(false);
+const subChartData = ref({});
+const subChartOptions = ref({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'bottom',
+      labels: {
+        font: {
+          size: 18,
+        },
+        padding: 20,
+      },
+    },
+    title: {
+      display: true,
+      text: 'Subcategory Ratios',
+      font: {
+        size: 20,
+      },
+      padding: {
+        top: 10,
+        bottom: 30,
+      },
+    },
+    datalabels: {
+      formatter: (value, context) => {
+        const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+        const percentage = (value / total * 100).toFixed(2) + '%';
+        return percentage;
+      },
+      color: '#000',
+      font: {
+        size: 20,
+        weight: 'bold', // Make the font bold
+      },
+    },
   },
-  {
-    id: 2,
-    description: 'Crowding issues in public transit.',
-    category: 'Public Transit',
-    subCategory: 'Crowding',
-    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-  },
-  {
-    id: 3,
-    description: 'Fare discrepancies in public transit.',
-    category: 'Public Transit',
-    subCategory: 'Fare',
-    timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
-  },
-  {
-    id: 4,
-    description: 'Accessibility issues in public transit.',
-    category: 'Public Transit',
-    subCategory: 'Accessibility',
-    timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days ago
-  },
-  {
-    id: 5,
-    description: 'Cleanliness concerns in public transit.',
-    category: 'Public Transit',
-    subCategory: 'Cleanliness',
-    timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
-  },
-  {
-    id: 6,
-    description: 'Parking availability issues.',
-    category: 'Parking',
-    subCategory: 'Availability',
-    timestamp: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days ago
-  },
-  {
-    id: 7,
-    description: 'High pricing for parking.',
-    category: 'Parking',
-    subCategory: 'Pricing',
-    timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
-  },
-  {
-    id: 8,
-    description: 'Illegal parking issues.',
-    category: 'Parking',
-    subCategory: 'Illegal Parking',
-    timestamp: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(), // 8 days ago
-  },
-  {
-    id: 9,
-    description: 'Special parking needs not met.',
-    category: 'Parking',
-    subCategory: 'Special Parking Needs',
-    timestamp: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(), // 9 days ago
-  },
-  {
-    id: 10,
-    description: 'Poor street lighting.',
-    category: 'Road Safety',
-    subCategory: 'Street Lighting',
-    timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
-  },
-  {
-    id: 11,
-    description: 'Issues with pedestrian crossings.',
-    category: 'Road Safety',
-    subCategory: 'Pedestrian Crossings',
-    timestamp: new Date(Date.now() - 11 * 24 * 60 * 60 * 1000).toISOString(), // 11 days ago
-  },
-  {
-    id: 12,
-    description: 'Traffic signs are not visible.',
-    category: 'Road Safety',
-    subCategory: 'Traffic Signs',
-    timestamp: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(), // 12 days ago
-  },
-  {
-    id: 13,
-    description: 'Accident hotspots not addressed.',
-    category: 'Road Safety',
-    subCategory: 'Accident Hotspots',
-    timestamp: new Date(Date.now() - 13 * 24 * 60 * 60 * 1000).toISOString(), // 13 days ago
-  },
-  {
-    id: 14,
-    description: 'Speeding zones not monitored.',
-    category: 'Road Safety',
-    subCategory: 'Speeding Zones',
-    timestamp: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days ago
-  },
-]);
+});
+
+const handleSegmentClick = (index) => {
+  if(index === null){
+    showSubChart.value = false;
+    return;
+  }
+  console.log('Segment Clicked', index);
+  const category = categories.value[index];
+  if (category && category.subCategories) {
+    const subCategoryCounts = Object.values(category.subCategories).map(count => count.length);
+    console.log(subCategoryCounts);
+
+    showSubChart.value = true;
+    subChartData.value = {
+      labels: Object.keys(category.subCategories),
+      datasets: [
+        {
+          backgroundColor: ['#FF9843', '#86A7FC', '#FFDD95', '#4BC0C0', '#FF6384'],
+          data: subCategoryCounts,
+        },
+      ],
+    };
+    console.log('Sub Chart Data', subChartData.value);
+  }
+};
+
 
 
 const calculateTimeRange = () => {
@@ -231,15 +196,15 @@ const calculateTimeRange = () => {
 
   const timeFilter = selectedTimeFilter.value;
   const currentTime = Date.now(); // Get current time in milliseconds
-  // console.log('currentTime', new Date(currentTime));
 
   let filterComplaints = [];
 
   for(const complaint of complaints.value){
-    const complaintTime = new Date(complaint.timestamp).getTime(); // Ensure complaintTime is in milliseconds
+    // console.log('Complaint', complaint);
+    const complaintTime = new Date(complaint.lastModifiedDate).getTime(); // Ensure complaintTime is in milliseconds
     const timeDifference = currentTime - complaintTime;
-    // console.log('complaintTime', new Date(complaintTime));
-    // console.log('Time Difference (ms)', timeDifference);
+    console.log('complaintTime', complaintTime);
+    console.log('Time Difference (ms)', timeDifference);
 
     switch (timeFilter) {
       case 0:
@@ -268,7 +233,6 @@ const calculateTimeRange = () => {
 
 };
 
-
 watch(selectedTimeFilter, () => {
   console.log(calculateTimeRange())
   filteredComplaints.value = calculateTimeRange();
@@ -286,18 +250,27 @@ const getCategories = async () => {
   try {
     for(const category of categories.value){
       const response = await getComplaintByCategory(category.name);
-      category.count = response.data.length;
+            // Group complaints by subCategory
+            response.forEach(complaint => {
+        if (!category.subCategories[complaint.subCategory]) {
+          category.subCategories[complaint.subCategory] = [];
+        }
+        category.subCategories[complaint.subCategory].push(complaint);
+      });
+      category.count = response.length;
     }
+    console.log(categories.value);
   }
   catch (error) {
     console.error(error);
   }
 }
 
-const getComplaints = async () => {
+
+const getComplaintsData = async () => {
   try {
     const response = await getComplaints();
-    complaints.value = response.data;
+    complaints.value.push(...response)
   }
   catch (error) {
     console.error(error);
@@ -333,4 +306,45 @@ const showDetails = (value, type, data) => {
   }
 }
 
+const handleClickOutside = (event) => {
+  const pieChartElement = document.querySelector('.pie-chart-container');
+  if (pieChartElement && !pieChartElement.contains(event.target)) {
+    showSubChart.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+  getCategories();
+  getComplaintsData();
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
+
 </script>
+
+<style scoped>
+.chart-container {
+  position: relative;
+  width: 100%; /* Adjust the width as needed */
+  height: 400px; /* Adjust the height as needed */
+}
+
+.sub-chart-container {
+  margin-top: 20px;
+}
+
+.custom-data-table .v-data-table__wrapper {
+  font-size: 20px; /* Adjust the font size as needed */
+}
+
+.custom-data-table .v-data-table-header th {
+  font-size: 18px; /* Adjust the font size for headers as needed */
+}
+
+.custom-data-table .v-data-table__wrapper td {
+  font-size: 18px; /* Adjust the font size for table data as needed */
+}
+</style>

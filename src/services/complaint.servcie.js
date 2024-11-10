@@ -4,12 +4,8 @@ const getComplaints = async () => {
   return getApiRequest('/complaints');
 }
 
-const getCompliant = async (id) => {
-  return getApiRequest(`/complaints/${id}`);
-}
-
 const getComplaintByCategory = async (category) => {
-  return getApiRequest(`/complaints/${category}`);
+  return getApiRequest(`/complaints/category/${category}`);
 }
 
 const updateComplaint = async (id, data) => {
@@ -17,14 +13,14 @@ const updateComplaint = async (id, data) => {
 }
 
 const createComplaint = async (message) => {
-  return postApiRequest(`/new_complaint`, message);
+  const data = { prompt: message };
+  return postApiRequest(`/new_complaint`, data);
   // return postApiRequest(`http://localhost:3001/api/chat`, message);
 
 }
 
 export {
   getComplaints,
-  getCompliant,
   getComplaintByCategory,
   createComplaint,
   updateComplaint
