@@ -4,12 +4,8 @@ const getComplaints = async () => {
   return getApiRequest('/complaints');
 }
 
-const getCompliant = async (id) => {
-  return getApiRequest(`/complaints/${id}`);
-}
-
 const getComplaintByCategory = async (category) => {
-  return getApiRequest(`/complaints/${category}`);
+  return getApiRequest(`/complaints/category/${category}`);
 }
 
 const updateComplaint = async (id, data) => {
@@ -23,7 +19,6 @@ const createComplaint = async (message) => {
 
 export {
   getComplaints,
-  getCompliant,
   getComplaintByCategory,
   createComplaint,
   updateComplaint

@@ -15,6 +15,7 @@
     "@mdi/font": "^7.4.47",
     "axios": "^1.7.7",
     "chart.js": "^4.4.6",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "pinia": "^2.2.6",
     "survey-vue": "^1.12.9",
     "vue": "^3.5.12",
