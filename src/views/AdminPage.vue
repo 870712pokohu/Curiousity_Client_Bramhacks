@@ -234,21 +234,6 @@ const calculateTimeRange = () => {
           filterComplaints.push(complaint);
         }
         break;
-      case 0:
-        if (timeDifference <= ONE_DAY) {
-          filterComplaints.push(complaint);
-        }
-        break;
-      case 1:
-        if (timeDifference <= SEVEN_DAYS) {
-          filterComplaints.push(complaint);
-        }
-        break;
-      case 2:
-        if (timeDifference <= THIRTY_DAYS) {
-          filterComplaints.push(complaint);
-        }
-        break;
       default:
         filterComplaints.push(complaint); // No filter applied if the timeFilter is unrecognized
     }
