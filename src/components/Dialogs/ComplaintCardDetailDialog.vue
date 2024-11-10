@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pa-5" style="min-height: 700px;">
+  <v-card class="pa-5 rounded-xl" style="min-height: 700px;">
     <div>{{complaint.title}}</div>
   </v-card>
 </template>
