@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8000'; // Replace with your backend URL
+const BASE_URL = process.env.USER_GROUP === 'admin' ? 'http://localhost:7000' : 'http://localhost:8000';
 
 
 const getApiRequest = async (url) => {

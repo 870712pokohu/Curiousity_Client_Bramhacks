@@ -32,14 +32,14 @@
           link
           @click="goToHomePage()"
           class="d-flex justify-center align-center"
-          style="background-color: #E0E0E0;height: 50px; margin-bottom: 10px;"
+          style="background-color: #B0BEC5;height: 50px; margin-bottom: 10px;"
         ></v-list-item>
         <v-list-item
           title="Survey"
           link
           @click="goToSurvey()"
           class="d-flex justify-center align-center"
-          style="background-color: #E0E0E0;
+          style="background-color: #B0BEC5;
            height: 50px; margin-bottom: 10px;"
         ></v-list-item>
       </v-list>

@@ -99,9 +99,21 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 ChartJS.register(Title, Tooltip, Legend, ArcElement, ChartDataLabels);
 
 const categories = ref([
-  { name: 'Public Transit', count: 0, subCategories: {} },
-  { name: 'Parking', count: 0, subCategories: {} },
-  { name: 'Road Safety', count: 0, subCategories: {} },
+  {
+    name: 'Public Transit',
+
+    count: 10,
+  }
+  ,
+  {
+    name: 'Parking',
+    count: 20,
+  }
+  ,
+  {
+    name: 'Road Safety',
+    count: 30,
+  }
 ]);
 
 const timeFilter = ref([
@@ -207,6 +219,21 @@ const calculateTimeRange = () => {
     console.log('Time Difference (ms)', timeDifference);
 
     switch (timeFilter) {
+      case 0:
+        if (timeDifference <= ONE_DAY) {
+          filterComplaints.push(complaint);
+        }
+        break;
+      case 1:
+        if (timeDifference <= SEVEN_DAYS) {
+          filterComplaints.push(complaint);
+        }
+        break;
+      case 2:
+        if (timeDifference <= THIRTY_DAYS) {
+          filterComplaints.push(complaint);
+        }
+        break;
       case 0:
         if (timeDifference <= ONE_DAY) {
           filterComplaints.push(complaint);

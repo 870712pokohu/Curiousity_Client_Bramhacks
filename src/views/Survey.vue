@@ -74,21 +74,21 @@ const submitForm = async() => {
   
 const surveys = ref([
   {
-    name: 'Survey 1',
+    name: 'Traffic and Parking',
   }
   ,
   {
-    name: 'Survey 2',
+    name: 'General Satisfaction',
   }
   ,
   {
-    name: 'Survey 3',
+    name: 'Cleanliness and Waste Management',
   },
   {
-    name: 'Survey 4',
+    name: 'Safety and Crime Reporting',
   },
   {
-    name: 'Survey 5',
+    name: 'Community Development Projects',
   }
 ]);
 
